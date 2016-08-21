@@ -1198,6 +1198,11 @@ public class SoapUI {
                     if (selectedPropertyHolderTable != null) {
                         JTabbedPane tabs = new JTabbedPane();
                         tabs.setName(PROPERTIES_TAB_PANEL_NAME);
+
+                        tabs.addTab(((TestPropertyHolder) modelItem).getPropertiesLabel(), selectedPropertyHolderTable);
+                        // always select "Custom properties" tab
+                        tabs.setSelectedIndex(tabs.getTabCount() - 1);
+
                         if (overviewPanel instanceof JPropertiesTable<?>) {
                             JPropertiesTable<?> t = (JPropertiesTable<?>) overviewPanel;
                             tabs.addTab(t.getTitle(), overviewPanel);
@@ -1206,7 +1211,6 @@ public class SoapUI {
                             tabs.addTab("Overview", overviewPanel);
                         }
 
-                        tabs.addTab(((TestPropertyHolder) modelItem).getPropertiesLabel(), selectedPropertyHolderTable);
                         overviewPanel = UISupport.createTabPanel(tabs, false);
                     }
 
