@@ -174,9 +174,13 @@ public class Navigator extends JPanel {
 
     public void selectModelItem(ModelItem modelItem) {
         TreePath path = treeModel.getPath(modelItem);
+        // disable tree expanding & scrolling when DnD switches focus
+        mainTree.setScrollsOnExpand(false);
+        mainTree.setExpandsSelectedPaths(false);
         mainTree.setSelectionPath(path);
-        mainTree.expandPath(path);
-        mainTree.scrollPathToVisible(path);
+        // Monkey see, monkey do
+        //mainTree.expandPath(path);
+        //mainTree.scrollPathToVisible(path);
     }
 
     public TreePath getTreePath(ModelItem modelItem) {
