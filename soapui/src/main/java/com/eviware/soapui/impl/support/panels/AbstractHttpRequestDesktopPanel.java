@@ -42,6 +42,7 @@ import com.eviware.soapui.support.actions.ChangeSplitPaneOrientationAction;
 import com.eviware.soapui.support.components.Inspector;
 import com.eviware.soapui.support.components.JEditorStatusBarWithProgress;
 import com.eviware.soapui.support.components.JXToolBar;
+import com.eviware.soapui.support.editor.EditorView;
 import com.eviware.soapui.support.editor.inspectors.AbstractXmlInspector;
 import com.eviware.soapui.support.editor.inspectors.auth.AuthInspectorFactory;
 import com.eviware.soapui.support.editor.views.xml.source.XmlSourceEditorView;
@@ -238,6 +239,13 @@ public abstract class AbstractHttpRequestDesktopPanel<T extends ModelItem, T2 ex
 
         requestEditor = buildRequestEditor();
         responseEditor = buildResponseEditor();
+
+        // choose custom tab
+        for (EditorView view : responseEditor.getViews()) {
+            if (SoapUI.SELECTED_RESPONSE_TAB.equals(view.getTitle())) {
+                responseEditor.selectView(view.getViewId());
+            }
+        }
 
         requestTabs = new JTabbedPane();
         requestTabs.addChangeListener(new ChangeListener() {

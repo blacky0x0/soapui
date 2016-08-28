@@ -219,6 +219,9 @@ public class SoapUI {
     public static final String TEST_SUITE_ACTIONS = "WsdlTestSuiteActions";
     public static final String TEST_CASE_ACTIONS = "WsdlTestCaseActions";
     public static final String TEST_STEP_ACTIONS = "WsdlTestStepActions";
+
+    public static final String[] RESPONSE_TAB_LIST = {"Raw", "JSON"};
+    public static String SELECTED_RESPONSE_TAB = RESPONSE_TAB_LIST[0];
     // ------------------------------ FIELDS ------------------------------
 
     private static List<Object> logCache = new ArrayList<Object>();
@@ -366,6 +369,9 @@ public class SoapUI {
                 "/Trial.png"));
         mainToolbar.add(new PreferencesActionDelegate());
         applyProxyButton = (JToggleButton) mainToolbar.add(new JToggleButton(new ApplyProxyButtonAction()));
+        mainToolbar.addSpace(20);
+        mainToolbar.add(new SelectResponseTabAction());
+
         updateProxyButtonAndTooltip();
 
         mainToolbar.addGlue();
@@ -1260,6 +1266,29 @@ public class SoapUI {
                     || StringUtils.isNullOrEmpty(SoapUI.getSettings().getString(ProxySettings.PORT, ""));
         }
     }
+
+    private class SelectResponseTabAction extends AbstractAction {
+
+        public SelectResponseTabAction() {
+            putValue(Action.NAME, SELECTED_RESPONSE_TAB.concat(" "));
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String selection;
+
+            if (SELECTED_RESPONSE_TAB.equals(RESPONSE_TAB_LIST[0])) {
+                SELECTED_RESPONSE_TAB = RESPONSE_TAB_LIST[1];
+                selection = SELECTED_RESPONSE_TAB;
+            } else {
+                SELECTED_RESPONSE_TAB = RESPONSE_TAB_LIST[0];
+                selection = SELECTED_RESPONSE_TAB + " ";
+            }
+
+            putValue(Action.NAME, selection);
+        }
+    }
+
 
     public static void updateProxyButtonAndTooltip() {
         if (applyProxyButton == null) {
