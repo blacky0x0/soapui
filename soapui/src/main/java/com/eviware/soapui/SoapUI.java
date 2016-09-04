@@ -166,6 +166,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -203,8 +206,9 @@ public class SoapUI {
     public static final String STARTER_PAGE_TOOL_TIP = "Info on SoapUI";
     public static String FRAME_ICON = "/SoapUI-OS-5.2_16-16.png;/SoapUI-OS-5.2_24-24.png;/SoapUI-OS-5.2_32-32.png;/SoapUI-OS-5.2_48-48.png;/SoapUI-OS-5.2_256-256.png";
 
-    public static String STARTER_PAGE_ERROR_URL = "file://" + System.getProperty("soapui.home", ".")
-            + "/starter-page.html";
+    public static String STARTER_PAGE_ERROR_URL = "file://" + System.getProperty("soapui.home", ".") + "/starter-page.html";
+    public static String CONFIG_FILE = System.getProperty("user.home") + "/soapui.properties";
+    public static Properties APP_PROPERTIES = new Properties();
 
     private static final int DEFAULT_DESKTOP_ACTIONS_COUNT = 3;
     private static final int DEFAULT_MAX_THREADPOOL_SIZE = 200;
@@ -853,6 +857,14 @@ public class SoapUI {
     }
 
     public static void main(String[] args) throws Exception {
+        log.info("Searching " + CONFIG_FILE);
+
+        try (InputStream is = new FileInputStream(CONFIG_FILE)) {
+            APP_PROPERTIES.load(is);
+        } catch (IOException ex) {
+            log.info("Couldn't load properties file: " + CONFIG_FILE);
+        }
+
         WebstartUtilCore.init();
         setBackgroundsToWhite();
         mainArgs = args;
