@@ -16,6 +16,7 @@
 
 package com.eviware.soapui;
 
+import com.eviware.soapui.ApplicationProperties.ColorProperty;
 import com.eviware.soapui.actions.SaveAllProjectsAction;
 import com.eviware.soapui.actions.ShowSystemPropertiesAction;
 import com.eviware.soapui.actions.SoapUIPreferencesAction;
@@ -183,6 +184,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.BackingStoreException;
 
+import static com.eviware.soapui.ApplicationProperties.ColorProperty.*;
 import static com.eviware.soapui.impl.support.HttpUtils.urlEncodeWithUtf8;
 
 /**
@@ -383,7 +385,7 @@ public class SoapUI {
             @Override
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Color.LIGHT_GRAY);
+                g.setColor((Color) APP_PROPERTIES.get(MAINTOOLBAR_SEARCHFIELD.getName()));
                 g.drawRect(0, 0, getWidth() - 1, getHeight() - 1);
             }
         };
@@ -439,9 +441,9 @@ public class SoapUI {
             @Override
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Color.WHITE);
+                g.setColor((Color) APP_PROPERTIES.get(MENUBAR_COLORBEFORE.getName()));
                 g.fillRect(0, 0, getWidth(), getHeight());
-                g.setColor(Color.LIGHT_GRAY);
+                g.setColor((Color) APP_PROPERTIES.get(MENUBAR_COLORAFTER.getName()));
                 g.drawLine(0, getHeight() - 1, getWidth(), getHeight() - 1);
             }
         };
@@ -832,41 +834,73 @@ public class SoapUI {
         }
     }
 
-    private static void setBackgroundsToWhite() {
-        UIManager.put("Button.background", Color.WHITE);
-        UIManager.put("Panel.background", Color.WHITE);
-        UIManager.put("MenuBar.background", Color.WHITE);
-        UIManager.put("ComboBox.background", Color.WHITE);
-        UIManager.put("TableHeader.background", Color.WHITE);
-        UIManager.put("ToolBar.background", Color.WHITE);
-        UIManager.put("TabbedPane.background", Color.LIGHT_GRAY);
-        UIManager.put("TabbedPane.selected", Color.WHITE);
-        UIManager.put("Label.background", Color.WHITE);
-        UIManager.put("CheckBox.background", Color.WHITE);
-        UIManager.put("Desktop.background", Color.WHITE);
-        UIManager.put("ProgressBar.background", Color.WHITE);
-        UIManager.put("InternalFrame.background", Color.WHITE);
-        UIManager.put("SplitPane.background", Color.WHITE);
-        UIManager.put("ScrollBar.background", Color.WHITE);
-        UIManager.put("Spinner.background", Color.WHITE);
-        UIManager.put("OptionPane.background", Color.WHITE);
-        UIManager.put("ToggleButton.background", Color.WHITE);
-        UIManager.put("Slider.background", Color.WHITE);
-        UIManager.put("RadioButton.background", Color.WHITE);
-        UIManager.put("ScrollPane.background", Color.WHITE);
+    private static void setBackgrounds() {
+        UIManager.put(BUTTON_BACKGROUND.getName(), APP_PROPERTIES.get(BUTTON_BACKGROUND.getName()));
+        UIManager.put(PANEL_BACKGROUND.getName(), APP_PROPERTIES.get(PANEL_BACKGROUND.getName()));
+        UIManager.put(MENUBAR_BACKGROUND.getName(), APP_PROPERTIES.get(MENUBAR_BACKGROUND.getName()));
+        UIManager.put(COMBOBOX_BACKGROUND.getName(), APP_PROPERTIES.get(COMBOBOX_BACKGROUND.getName()));
+        UIManager.put(TABLEHEADER_BACKGROUND.getName(), APP_PROPERTIES.get(TABLEHEADER_BACKGROUND.getName()));
+        UIManager.put(TOOLBAR_BACKGROUND.getName(), APP_PROPERTIES.get(TOOLBAR_BACKGROUND.getName()));
+        UIManager.put(TABBEDPANE_BACKGROUND.getName(), APP_PROPERTIES.get(TABBEDPANE_BACKGROUND.getName()));
+        UIManager.put(TABBEDPANE_SELECTED.getName(), APP_PROPERTIES.get(TABBEDPANE_SELECTED.getName()));
+        UIManager.put(LABEL_BACKGROUND.getName(), APP_PROPERTIES.get(LABEL_BACKGROUND.getName()));
+        UIManager.put(CHECKBOX_BACKGROUND.getName(), APP_PROPERTIES.get(CHECKBOX_BACKGROUND.getName()));
+        UIManager.put(DESKTOP_BACKGROUND.getName(), APP_PROPERTIES.get(DESKTOP_BACKGROUND.getName()));
+        UIManager.put(PROGRESSBAR_BACKGROUND.getName(), APP_PROPERTIES.get(PROGRESSBAR_BACKGROUND.getName()));
+        UIManager.put(INTERNALFRAME_BACKGROUND.getName(), APP_PROPERTIES.get(INTERNALFRAME_BACKGROUND.getName()));
+        UIManager.put(SPLITPANE_BACKGROUND.getName(), APP_PROPERTIES.get(SPLITPANE_BACKGROUND.getName()));
+        UIManager.put(SCROLLBAR_BACKGROUND.getName(), APP_PROPERTIES.get(SCROLLBAR_BACKGROUND.getName()));
+        UIManager.put(SPINNER_BACKGROUND.getName(), APP_PROPERTIES.get(SPINNER_BACKGROUND.getName()));
+        UIManager.put(OPTIONPANE_BACKGROUND.getName(), APP_PROPERTIES.get(OPTIONPANE_BACKGROUND.getName()));
+        UIManager.put(TOGGLEBUTTON_BACKGROUND.getName(), APP_PROPERTIES.get(TOGGLEBUTTON_BACKGROUND.getName()));
+        UIManager.put(SLIDER_BACKGROUND.getName(), APP_PROPERTIES.get(SLIDER_BACKGROUND.getName()));
+        UIManager.put(RADIOBUTTON_BACKGROUND.getName(), APP_PROPERTIES.get(RADIOBUTTON_BACKGROUND.getName()));
+        UIManager.put(SCROLLPANE_BACKGROUND.getName(), APP_PROPERTIES.get(SCROLLPANE_BACKGROUND.getName()));
+    }
+
+    public static void loadProperties() {
+
+        StringBuilder sb = new StringBuilder();
+
+        for (ColorProperty prop : ColorProperty.values()) {
+            sb.append(prop.getName()).append("; ");
+        }
+        log.info("List of color properties which can be changed: " + sb.toString());
+
+        for (ColorProperty prop : ColorProperty.values()) {
+            String value = (String) APP_PROPERTIES.get(prop.getName());
+
+            if (value != null) {
+                try {
+                    javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.web(value);
+                    Color awtColor = new Color((float) fxColor.getRed(), (float) fxColor.getGreen(), (float) fxColor.getBlue());
+                    APP_PROPERTIES.put(prop.getName(), awtColor);
+
+                } catch (Exception e) {
+                    log.warn("Couldn't load color: `" + value + "` for property: `" + prop.getName() + "`");
+                    APP_PROPERTIES.put(prop.getName(), prop.getDefaultColor());
+                }
+
+            } else {
+                APP_PROPERTIES.put(prop.getName(), prop.getDefaultColor());
+            }
+        }
     }
 
     public static void main(String[] args) throws Exception {
         log.info("Searching " + CONFIG_FILE);
+        log.info("Colors which can be used for the app can be found there -> https://docs.oracle.com/javafx/2/api/javafx/scene/paint/Color.html");
 
         try (InputStream is = new FileInputStream(CONFIG_FILE)) {
             APP_PROPERTIES.load(is);
         } catch (IOException ex) {
-            log.info("Couldn't load properties file: " + CONFIG_FILE);
+            log.info("Couldn't load properties file: " + CONFIG_FILE + " Use default values");
+        } finally {
+            loadProperties();
         }
 
         WebstartUtilCore.init();
-        setBackgroundsToWhite();
+        setBackgrounds();
         mainArgs = args;
 
         SoapUIRunner soapuiRunner = new SoapUIRunner();
@@ -1321,7 +1355,7 @@ public class SoapUI {
             applyProxyButton.getAction().putValue(Action.SHORT_DESCRIPTION, "Proxy Setting: None");
         }
         applyProxyButton.setSelected(ProxyUtils.isProxyEnabled());
-        UIManager.put("ToggleButton.select", Color.WHITE);
+        UIManager.put(TOGGLEBUTTON_SELECT.getName(), APP_PROPERTIES.get(TOGGLEBUTTON_SELECT.getName()));
         SwingUtilities.updateComponentTreeUI(applyProxyButton);
     }
 
